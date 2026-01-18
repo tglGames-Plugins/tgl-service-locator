@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -17,7 +18,7 @@ namespace TGL.ServiceLocator
 		private static Dictionary<Scene, ServiceLocator> SceneContainers = new Dictionary<Scene, ServiceLocator>();
 		private static List<GameObject> tmpSceneGameObjects;
 		
-		private readonly ServiceManager serviceManager = new ServiceManager();
+		private ServiceManager serviceManager;
 		private static readonly string k_globalServiceLocatorName = "ServiceLocator [Global]";
 		private static readonly string k_sceneServiceLocatorName = "ServiceLocator [Scene]";
 		
@@ -49,6 +50,7 @@ namespace TGL.ServiceLocator
 			{
 				globalLocator = this;
 				serviceLocatorType = ServiceLocatorType.Global;
+				serviceManager = new ServiceManager(this);
 				if (doNotDestroyOnLoad)
 				{
 					DontDestroyOnLoad(gameObject);
@@ -84,6 +86,7 @@ namespace TGL.ServiceLocator
 				return;
 			}
 			serviceLocatorType = ServiceLocatorType.Scene;
+			serviceManager = new ServiceManager(this);
 			SceneContainers.Add(scene, this);
 			SceneManager.sceneUnloaded += OnSceneRemoved;
 			Debug.Log($"Scene Service Locator is bootstrapped!");
@@ -101,6 +104,7 @@ namespace TGL.ServiceLocator
 				return;
 			}
 			serviceLocatorType = ServiceLocatorType.GameObject;
+			serviceManager = new ServiceManager(this);
 		}
 		
 		#endregion ConfiguringServiceLocator
@@ -362,6 +366,29 @@ namespace TGL.ServiceLocator
 		}
 
 		#endregion RegisterOrGetService
+
+		#region UnRegisterService
+
+		/// <summary>
+		/// Unregisters the service which was registered previously, throws error on Argument type if it was not registered previously
+		/// </summary>
+		/// <param name="service">The service to unregister</param>
+		/// <typeparam name="T">The type of service which is being unregistered</typeparam>
+		public void UnRegister<T>(T service)
+		{
+			serviceManager.UnRegisterService(service);
+		}
+		
+		/// <summary>
+		/// Unregisters the type of service which was registered previously, throws error on Argument type if it was not registered previously
+		/// </summary>
+		/// <param name="type">the type of service which was registered previously</param>
+		public void UnRegister(Type type)
+		{
+			serviceManager.UnRegisterType(type);
+		}
+
+		#endregion UnRegisterService
 		
 		#region RemoveServiceLocatorSetup
 
@@ -443,23 +470,21 @@ namespace TGL.ServiceLocator
 #endif
 		#endregion AddingServiceLocatorInScene
 
-		#region Unimplemented
-
-		public void UnRegister<T>(T service)
-		{
-			throw new NotImplementedException();
-		}
-		public void UnRegister(Type type, object service)
-		{
-			throw new NotImplementedException();
-		}
-
+		#region Debugging
+		
+		[ContextMenu("PrintAllRegisteredServices")]
 		public void PrintAllRegisteredServices()
 		{
+			Debug.Log($"Debugging All Registered services at {serviceLocatorType} level", this);
 			// plan is to print 1 log per service with first log limited to scope of service locator and count of registered services
 			// each registered service log will contain the key type and the value type, which will help identify what was wrong in case of errors.
-			throw new NotImplementedException();
+			Dictionary<Type, object> registeredServices = serviceManager.GetRegistrationCopy;
+			int index = 1;
+			foreach (KeyValuePair<Type, object> registeredService in registeredServices)
+			{
+				Debug.Log($"Entry {index:00} :: KeyType: {registeredService.Key.FullName} - ValueType: {registeredService.Value.GetType().FullName}");
+			}
 		}
-		#endregion Unimplemented
+		#endregion Debugging
 	}
 }

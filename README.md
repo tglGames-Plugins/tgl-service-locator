@@ -161,7 +161,8 @@ When you initialize a service, register it based on the necessary scope
 when you destroy a service, remember to unregister the service
 when you need a service, make a get call and use as if you already had the service available.
 
-Git Link: 
+Git Link: https://github.com/tglGames-Plugins/tgl-service-locator
+
 
 
 ---
@@ -169,4 +170,5 @@ Git Link:
 References:  
 1: https://github.com/adammyhre/Unity-Service-Locator  
 2: https://www.youtube.com/watch?v=D4r5EyYQvwY  
-3: https://www.youtube.com/watch?v=6bJmEnpxVoI
+3: https://www.youtube.com/watch?v=y4mn3kmxRx0
+

@@ -12,6 +12,8 @@ namespace TGL.ServiceLocator
 		/// Hashset for all services registered
 		/// </summary>
 		private readonly Dictionary<Type, object> servicesDict = new Dictionary<Type, object>();
+
+		private readonly ServiceLocator _serviceLocator;
 		#endregion Variables
 
 		#region Properties
@@ -19,7 +21,7 @@ namespace TGL.ServiceLocator
 		/// <summary>
 		/// all services currently registered
 		/// </summary>
-		public IEnumerable<object> RegisteredServices => servicesDict.Values;
+		public Dictionary<Type, object> GetRegistrationCopy => new Dictionary<Type, object>(servicesDict);
 
 #if Testing
 		/// <summary>
@@ -34,6 +36,15 @@ namespace TGL.ServiceLocator
 #endif
 
 		#endregion Properties
+
+		#region Constructor
+
+		public ServiceManager(ServiceLocator serviceLocator)
+		{
+			_serviceLocator = serviceLocator;
+		}
+
+		#endregion Constructor
 
 		#region PublicMethods
 
@@ -54,12 +65,9 @@ namespace TGL.ServiceLocator
 				Debug.LogError($"{nameof(ServiceManager)}.{nameof(RegisterService)}: Service of type {type.FullName} already registered");
 				return null; // failed to add so cannot return the ServiceManager which registered the service
 			}
-			else
-			{
 #if Testing
-				Debug.Log($"Registered the service of type {type.FullName} at {_serviceLocatorType} level");
+			Debug.Log($"Registered the service of type {type.FullName} at {_serviceLocatorType} level");
 #endif
-			}
 			return this;
 		}
 		
@@ -96,12 +104,55 @@ namespace TGL.ServiceLocator
 				Debug.LogError($"{nameof(ServiceManager)}.{nameof(RegisterService)}: Service of type {type.FullName} already registered");
 				return null;
 			}
-			else
-			{
 #if Testing
-				Debug.Log($"Registered the service of type {type.FullName} at {_serviceLocatorType} level");
+			Debug.Log($"Registered the service of type {type.FullName} at {_serviceLocatorType} level");
 #endif
+			return this;
+		}
+		
+		/// <summary>
+		/// unregisters the passed service if present in the dictionary
+		/// </summary>
+		/// <param name="service">The service to unregister</param>
+		/// <typeparam name="T">The type of service we are trying to unregister</typeparam>
+		/// <returns>Reference of the service manager that unregistered the service</returns>
+		/// <exception cref="ArgumentException">Exception if the passed service type was not present in the dictionary</exception>
+		public ServiceManager UnRegisterService<T>(T service)
+		{
+			Type type = typeof(T);
+			if (!servicesDict.ContainsKey(type))
+			{
+				Debug.LogError($"We do not have the service type ({type.FullName}) that you are trying to unregister", _serviceLocator);
+				if (servicesDict.ContainsValue(service))
+				{
+					Debug.LogWarning($"We have a service of type {service.GetType().FullName} registered which might be what you wanted", _serviceLocator);
+					throw new ArgumentException($"We have a regsitered type {service.GetType().FullName}, but you are trying to unregister {type.FullName} which is wrong");
+				}
+				else
+				{
+					throw new ArgumentException($"you are trying to unregister {type.FullName} which is not available in the service locator");
+				}
 			}
+			
+			servicesDict.Remove(type);
+			return this;
+		}
+
+		/// <summary>
+		/// unregisters the passed type if present in the dictionary
+		/// </summary>
+		/// <param name="type">The type of service we want to unregister</param>
+		/// <returns>Reference of the service manager that unregistered the service</returns>
+		/// <exception cref="ArgumentException">Exception if the passed type was not present in the dictionary</exception>
+		public ServiceManager UnRegisterType(Type type)
+		{
+			if (!servicesDict.ContainsKey(type))
+			{
+				Debug.LogError($"We do not have the service type ({type.FullName}) that you are trying to unregister", _serviceLocator);
+				throw new ArgumentException($"you are trying to unregister {type.FullName} which is not available in the service locator");
+			}
+			
+			servicesDict.Remove(type);
 			return this;
 		}
 		
@@ -152,7 +203,40 @@ namespace TGL.ServiceLocator
 		}
 
 		#endregion Get
-		
+
+		#region HasServiceOrType
+		/// <summary>
+		/// Does the dictionary have the passed service as a key in Dictionary
+		/// </summary>
+		/// <param name="service">the passed service we want to test</param>
+		/// <typeparam name="T">the type of the passed service we want to test</typeparam>
+		/// <returns>bool stating whether the service exists</returns>
+		public bool HasService<T>(T service)
+		{
+			Type type = typeof(T);
+			if (servicesDict.ContainsKey(type))
+			{
+				return true;
+			}
+
+			if (servicesDict.ContainsValue(service))
+			{
+				Debug.LogWarning($"The service passed is present of type ({service.GetType().FullName}) but you are checking for type ({type.FullName})", _serviceLocator);
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Does the dictionary have the passed type as a key in Dictionary
+		/// </summary>
+		/// <param name="type">The type of service we want to test</param>
+		/// <returns>bool stating whether the key exists</returns>
+		public bool HasType(Type type)
+		{
+			return servicesDict.ContainsKey(type);
+		}
+		#endregion HasServiceOrType
 		#endregion PublicMethods
 	}
 }

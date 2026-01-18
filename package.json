@@ -1,6 +1,6 @@
 {
   "name": "com.tglgames.tgl-service-locator",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "displayName": "TGL Service Locator",
   "description": "This is a service locator for finding required services. This helps find services at run time based on interfaces",
   "author": {

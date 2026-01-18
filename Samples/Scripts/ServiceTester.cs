@@ -11,9 +11,8 @@ namespace TGL.ServiceLocator.Samples
 		private ILocalization localizationService;
 		private ISerializer serializerService;
 		private MockMapService mapService;
-		
 
-
+		private bool areServicesRegistered;
 		#region MonoBehaviourMethods
 
 		private void Awake()
@@ -21,54 +20,7 @@ namespace TGL.ServiceLocator.Samples
 			// InitializeTheServicesDirectly(); // Alternative way for ease of understanding
 			RegisterServicesDirectly();
 		}
-
-		private IEnumerator StartDemo()
-		{
-			yield return null;
-			Debug.Log($"Start of Testing");
-			yield return null;
-			
-			// ServiceLocator.Global.Get(out localizationService); // Need to re-check
-			// ServiceLocator.ForSceneOf(this).Get(out localizationService); // Need to re-check
-			// ServiceLocator.For(this).Get(out localizationService); // Need to re-check
-			ServiceLocator.GetSlForGameObjectOf(this)
-				// .Get(out serializerService); // GameObject level registration attempted // registered at Scene Level
-				// .Get(out localizationService); // Global level registration attempted // registered at Global Level
-				.Get(out gameService); // 
-			yield return null;
-			
-			if (serializerService != null)
-			{
-				Debug.Log($"Found serializerService and running method");
-				serializerService.Serialize();
-			}
-			else
-			{
-				Debug.LogWarning($"serializerService is null");
-			}
-
-			if (localizationService != null)
-			{
-				Debug.Log($"Found localizationService and running method " +  localizationService.GetLocalizedWord("RandomKey"));
-			}
-			else
-			{
-				Debug.LogWarning($"localizationService is null");
-			}
-
-			if (gameService != null)
-			{
-				Debug.Log($"Found gameService and running method");
-				gameService.StartGame();
-			}
-			else
-			{
-				Debug.LogWarning($"gameService is null");
-			}
-			
-			Debug.Log($"Complete!");
-		}
-
+		
 		private IEnumerator Start()
 		{
 			yield return null;
@@ -95,7 +47,73 @@ namespace TGL.ServiceLocator.Samples
 			yield return null;
 			Debug.Log($"Complete!");
 		}
+		
+		private void OnDestroy()
+		{
+			if (areServicesRegistered)
+			{
+				UnRegisterServices();
+			}
+		}
+		
+		#endregion MonoBehaviourMethods
 
+		#region RegisterAndUnregister
+		
+		/// <summary>
+		/// Registers a service while initializing it.
+		/// </summary>
+		private void RegisterServicesDirectly()
+		{
+			// Global Level service
+			ServiceLocator.GetSlGlobal?.Register(localizationService = new MockLocalizer()); // this way we can register our service directly at the Global level. It is registered as 'ILocalization' type of service
+			// scene level service
+			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(MockMapService), gameService = new MockMapService()); // this way we can register our service directly in the scene level ServiceLocator. It is registered as 'MockMapService' type of service
+			// GameObject level service
+			ServiceLocator.GetSlForGameObjectOf(this)?.Register(audioService = new MockAudioService()); // this way we can register our service directly in the same GameObject level ServiceLocator. It is registered as 'IAudioService' type of service
+			ServiceLocator.GetSlForGameObjectOf(this)?.Register(serializerService = new MockSerializer()); // It is registered as 'ISerializer' type of service
+			areServicesRegistered = true;
+		}
+
+		/// <summary>
+		/// Initialized a service then registers it
+		/// </summary>
+		private void InitializeTheServices()
+		{
+			// initialize the services
+			localizationService = new MockLocalizer();
+			audioService = new MockAudioService();
+			serializerService = new MockSerializer();
+			
+			// We can use same interface type with different implementations
+			gameService = new MockGameService();
+			// gameService = new MockMapService();
+			
+			
+			// Register a service globally
+			ServiceLocator.GetSlGlobal?.Register(localizationService); // registers this service as a global service. Here the type will be the final concrete type (MockLocalizer)
+			// Register a service at scene level
+			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(IGameService), gameService); // registers a service at scene level with a specific passed type (IGameService)
+			// Register a service at GameObject level 
+			ServiceLocator.GetSlForGameObjectOf(this)?.Register(audioService);
+			ServiceLocator.GetSlForGameObjectOf(this).Register(serializerService);
+		}
+
+		[ContextMenu("UnRegisterServices")]
+		private void UnRegisterServices()
+		{
+			ServiceLocator.GetSlGlobal?.UnRegister(localizationService); // unregisters the ILocalization type of object we registered in RegisterServicesDirectly
+			ServiceLocator.GetSlForSceneOf(this)?.UnRegister(typeof(MockMapService)); // unregisters the MockMapService type which we registered in awake for 'gameService' (IGameService) in RegisterServicesDirectly
+			ServiceLocator.GetSlForGameObjectOf(this)?.UnRegister(typeof(IAudioService)); // unregisters the IAudioService type which we registered in RegisterServicesDirectly
+			ServiceLocator.GetSlForGameObjectOf(this)?.UnRegister(serializerService); // unregisters the ISerializer type of object we registered in RegisterServicesDirectly
+			Debug.Log($"All services unregistered successfully");
+			areServicesRegistered = false;
+		}
+		
+		#endregion RegisterAndUnregister
+
+		#region Testing
+		
 		private IEnumerator TestAudioService(ServiceLocator gobServiceLocator)
 		{
 			yield return null;
@@ -183,44 +201,6 @@ namespace TGL.ServiceLocator.Samples
 			yield return null;
 		}
 		
-		#endregion MonoBehaviourMethods
-
-		/// <summary>
-		/// Registers a service while initializing it.
-		/// </summary>
-		private void RegisterServicesDirectly()
-		{
-			// Global Level service
-			ServiceLocator.GetSlGlobal?.Register(localizationService = new MockLocalizer()); // this way we can register our service directly at the Global level. It is registered as 'ILocalization' type of service
-			// scene level service
-			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(MockMapService), gameService = new MockMapService()); // this way we can register our service directly in the scene level ServiceLocator. It is registered as 'MockMapService' type of service
-			// GameObject level service
-			ServiceLocator.GetSlForGameObjectOf(this)?.Register(audioService = new MockAudioService()); // this way we can register our service directly in the same GameObject level ServiceLocator. It is registered as 'IAudioService' type of service
-			ServiceLocator.GetSlForGameObjectOf(this)?.Register(serializerService = new MockSerializer()); // It is registered as 'ISerializer' type of service
-		}
-
-		/// <summary>
-		/// Initialized a service then registers it
-		/// </summary>
-		private void InitializeTheServices()
-		{
-			// initialize the services
-			localizationService = new MockLocalizer();
-			audioService = new MockAudioService();
-			serializerService = new MockSerializer();
-			
-			// We can use same interface type with different implementations
-			gameService = new MockGameService();
-			// gameService = new MockMapService();
-			
-			
-			// Register a service globally
-			ServiceLocator.GetSlGlobal?.Register(localizationService); // registers this service as a global service. Here the type will be the final concrete type (MockLocalizer)
-			// Register a service at scene level
-			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(IGameService), gameService); // registers a service at scene level with a specific passed type (IGameService)
-			// Register a service at GameObject level 
-			ServiceLocator.GetSlForGameObjectOf(this)?.Register(audioService);
-			ServiceLocator.GetSlForGameObjectOf(this).Register(serializerService);
-		}
+		#endregion Testing
 	}
 }
