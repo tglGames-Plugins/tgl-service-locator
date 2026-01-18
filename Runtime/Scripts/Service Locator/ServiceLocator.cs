@@ -483,6 +483,7 @@ namespace TGL.ServiceLocator
 			foreach (KeyValuePair<Type, object> registeredService in registeredServices)
 			{
 				Debug.Log($"Entry {index:00} :: KeyType: {registeredService.Key.FullName} - ValueType: {registeredService.Value.GetType().FullName}");
+				index++;
 			}
 		}
 		#endregion Debugging
