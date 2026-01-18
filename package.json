@@ -1,0 +1,23 @@
+{
+  "name": "com.tglgames.tgl-service-locator",
+  "version": "0.0.1",
+  "displayName": "TGL Service Locator",
+  "description": "This is a service locator for finding required services. This helps find services at run time based on interfaces",
+  "author": {
+    "name" : "Rishabh Jain",
+    "email" : "thegamelearner@gmail.com",
+    "url" : "https://tglblog.vercel.app/"
+  },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/@tglGames-Plugins" },
+  "unity": "6000.0",
+  "unityRelease": "58f1",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "licensesUrl": "https://opensource.org/license/apache-2-0",
+  "dependencies": { },
+  "keywords": [
+    "TGL",
+    "Service Locator"
+  ]
+}
+
