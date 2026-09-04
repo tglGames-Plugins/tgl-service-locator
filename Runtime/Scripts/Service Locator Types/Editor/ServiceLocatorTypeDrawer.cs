@@ -1,4 +1,5 @@
 using UnityEngine;
+using TGL.ServiceLocator;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

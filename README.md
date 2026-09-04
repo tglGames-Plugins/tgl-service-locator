@@ -165,10 +165,14 @@ Git Link: https://github.com/tglGames-Plugins/tgl-service-locator
 
 
 
+## How to add this package?
+See [How to add this package](HowToAddPackage.md) for detailed instructions.
+
+
+
 ---
 
 References:  
 1: https://github.com/adammyhre/Unity-Service-Locator  
 2: https://www.youtube.com/watch?v=D4r5EyYQvwY  
 3: https://www.youtube.com/watch?v=y4mn3kmxRx0
-
