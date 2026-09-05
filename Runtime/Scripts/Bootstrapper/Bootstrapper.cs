@@ -40,7 +40,11 @@ namespace TGL.ServiceLocator
 		/// </summary>
 		public void BootstrapOnDemand()
 		{
-			if(hasBeenBootstrapped) return;
+			if(hasBeenBootstrapped)
+			{
+				return;
+			}
+			
 			hasBeenBootstrapped = true;
 			Bootstrap();
 		}

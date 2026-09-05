@@ -61,7 +61,8 @@ will calculate and give you the position, keeping your module simple and small.
 #### understanding to use service locator
 Let us assume you have an interface (`IBase01`) which will be implemented by an abstract class (`AbsImpl02`).
 Now, we will define a few concrete classes and inherit from `AbsImpl02`.
-Now, if you have to write code, you might only care about `IBase01` or `AbsImpl02` if you are using **Dependency Inversion Principle (DIP)** or 'D' in *'SOLID'* principles, but you can see the architecture below for better understanding:
+Now, if you have to write code, you might only care about `IBase01` or `AbsImpl02` if you are using **Dependency Inversion Principle (DIP)** or 'D' in *'SOLID'* principles,  
+You can see the architecture below for better understanding:
 
 ```mermaid
 classDiagram

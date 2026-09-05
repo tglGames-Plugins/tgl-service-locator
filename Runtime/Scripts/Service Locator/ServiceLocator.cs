@@ -113,40 +113,37 @@ namespace TGL.ServiceLocator
 		/// <summary>
 		/// provides the Global ServiceLocator for the app 
 		/// </summary>
-		public static ServiceLocator GetSlGlobal
+		public static ServiceLocator GetSlGlobal()
 		{
-			get
+			if (globalLocator != null)
 			{
-				if (globalLocator != null)
-				{
-					// if globalLocator is already assigned, return it.
-					return globalLocator;
-				}
-				
-				// Find the Bootstrapper for global Service locator if available, we might have only missed bootstrapping it to our locator
-				if (FindFirstObjectByType<ServiceLocatorGlobalBootstrapper>() is { } foundBootstrapper)
-				{
-					foundBootstrapper.BootstrapOnDemand();
-					return globalLocator;
-				}
-				
-				// Alternative way for same code, for better understanding, 'slBootstrapper' is same as 'foundBootstrapper'
-				/*
-				var slBootstrapper = FindFirstObjectByType<ServiceLocatorGlobalBootstrapper>();
-				if (slBootstrapper != null) 
-				{
-					slBootstrapper.BootstrapOnDemand();
-					return globalLocator;
-				}
-				*/
-
-				// create a new global service locator and bootstrap it
-				GameObject globalContainer = new GameObject(k_globalServiceLocatorName, typeof(ServiceLocator));
-				globalContainer.AddComponent<ServiceLocatorGlobalBootstrapper>().BootstrapOnDemand();
-				
-				// globalLocator is set by BootstrapOnDemand() if it is at global level irrespective of who calls it. 
+				// if globalLocator is already assigned, return it.
 				return globalLocator;
 			}
+			
+			// Find the Bootstrapper for global Service locator if available, we might have only missed bootstrapping it to our locator
+			if (FindFirstObjectByType<ServiceLocatorGlobalBootstrapper>() is { } foundBootstrapper)
+			{
+				foundBootstrapper.BootstrapOnDemand();
+				return globalLocator;
+			}
+			
+			// Alternative way for same code, for better understanding, 'slBootstrapper' is same as 'foundBootstrapper'
+			/*
+			var slBootstrapper = FindFirstObjectByType<ServiceLocatorGlobalBootstrapper>();
+			if (slBootstrapper != null) 
+			{
+				slBootstrapper.BootstrapOnDemand();
+				return globalLocator;
+			}
+			*/
+
+			// create a new global service locator and bootstrap it
+			GameObject globalContainer = new GameObject(k_globalServiceLocatorName, typeof(ServiceLocator));
+			globalContainer.AddComponent<ServiceLocatorGlobalBootstrapper>().BootstrapOnDemand();
+			
+			// globalLocator is set by BootstrapOnDemand() if it is at global level irrespective of who calls it. 
+			return globalLocator;
 		}
 
 		/// <summary>
@@ -196,7 +193,7 @@ namespace TGL.ServiceLocator
 			}
 			
 			// return global Service locator as we did not find a 'ServiceLocator' in the 'SceneContainers' or in the scene root objects
-			return GetSlGlobal;
+			return GetSlGlobal();
 		}
 
 		/// <summary>
@@ -252,8 +249,8 @@ namespace TGL.ServiceLocator
 		
 		/// <summary>
 		/// Searches a service of passed type from current ServiceLocator to the global ServiceLocator, <br/>
-		/// if a ServiceLocator is found with the passed service, we return the ServiceLocator along with the service <br/>
-		/// if a ServiceLocator is not found, we search till we reach global ServiceLocator and then return null. 
+		/// if a Service is found with the passed service type, we return the Service as an out parameter <br/>
+		/// if a Service is not found, we search till we reach global ServiceLocator and then return null. 
 		/// </summary>
 		/// <param name="service">the service we found is returned as a out parameter</param>
 		/// <typeparam name="T">The type of service we want to find</typeparam>
@@ -343,7 +340,7 @@ namespace TGL.ServiceLocator
 		/// </summary>
 		/// <param name="attachedLocator">The next level ServiceLocator found by this method</param>
 		/// <returns>bool status of success or failure in finding another service locator</returns>
-		bool TryGetNextServiceLocatorInHierarchy(ServiceLocator currScope, out ServiceLocator attachedLocator)
+		private bool TryGetNextServiceLocatorInHierarchy(ServiceLocator currScope, out ServiceLocator attachedLocator)
 		{
 			if (currScope == globalLocator || currScope.serviceLocatorType == ServiceLocatorType.Global)
 			{
@@ -351,7 +348,7 @@ namespace TGL.ServiceLocator
 				attachedLocator = null;
 				return false;
 			}
-			attachedLocator = currScope.serviceLocatorType < ServiceLocatorType.Scene ? GetSlForSceneOf(this) : GetSlGlobal;
+			attachedLocator = currScope.serviceLocatorType < ServiceLocatorType.Scene ? GetSlForSceneOf(this) : GetSlGlobal();
 			return attachedLocator != null;
 		}
 
@@ -419,7 +416,7 @@ namespace TGL.ServiceLocator
 		/// Due to attribute, this method is called when Unity's runtime systems are being initialized, specifically during the subsystem registration phase.
 		/// </summary>
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-		static void ResetStatics()
+		private static void ResetStatics()
 		{
 			globalLocator = null;
 			SceneContainers = new Dictionary<Scene, ServiceLocator>();

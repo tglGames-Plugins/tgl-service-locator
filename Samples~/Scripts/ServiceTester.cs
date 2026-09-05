@@ -66,7 +66,7 @@ namespace TGL.ServiceLocator.Samples
 		private void RegisterServicesDirectly()
 		{
 			// Global Level service
-			ServiceLocator.GetSlGlobal?.Register(localizationService = new MockLocalizer()); // this way we can register our service directly at the Global level. It is registered as 'ILocalization' type of service
+			ServiceLocator.GetSlGlobal()?.Register(localizationService = new MockLocalizer()); // this way we can register our service directly at the Global level. It is registered as 'ILocalization' type of service
 			// scene level service
 			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(MockMapService), gameService = new MockMapService()); // this way we can register our service directly in the scene level ServiceLocator. It is registered as 'MockMapService' type of service
 			// GameObject level service
@@ -91,7 +91,7 @@ namespace TGL.ServiceLocator.Samples
 			
 			
 			// Register a service globally
-			ServiceLocator.GetSlGlobal?.Register(localizationService); // registers this service as a global service. Here the type will be the final concrete type (MockLocalizer)
+			ServiceLocator.GetSlGlobal()?.Register(localizationService); // registers this service as a global service. Here the type will be the final concrete type (MockLocalizer)
 			// Register a service at scene level
 			ServiceLocator.GetSlForSceneOf(this)?.Register(typeof(IGameService), gameService); // registers a service at scene level with a specific passed type (IGameService)
 			// Register a service at GameObject level 
@@ -102,7 +102,7 @@ namespace TGL.ServiceLocator.Samples
 		[ContextMenu("UnRegisterServices")]
 		private void UnRegisterServices()
 		{
-			ServiceLocator.GetSlGlobal?.UnRegister(localizationService); // unregisters the ILocalization type of object we registered in RegisterServicesDirectly
+			ServiceLocator.GetSlGlobal()?.UnRegister(localizationService); // unregisters the ILocalization type of object we registered in RegisterServicesDirectly
 			ServiceLocator.GetSlForSceneOf(this)?.UnRegister(typeof(MockMapService)); // unregisters the MockMapService type which we registered in awake for 'gameService' (IGameService) in RegisterServicesDirectly
 			ServiceLocator.GetSlForGameObjectOf(this)?.UnRegister(typeof(IAudioService)); // unregisters the IAudioService type which we registered in RegisterServicesDirectly
 			ServiceLocator.GetSlForGameObjectOf(this)?.UnRegister(serializerService); // unregisters the ISerializer type of object we registered in RegisterServicesDirectly

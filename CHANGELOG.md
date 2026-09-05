@@ -1,5 +1,9 @@
 # Change Log
 
+### 2026-09-05 (v1.0.2)
+Added Simplified understanding document as the readme was bloated.
+made `GetSlGlobal` from property to a method.
+
 ### 2026-01-18 (v1.0.0)
 Implemented Unregister and debugging methods.
 
